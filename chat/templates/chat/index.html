@@ -1,0 +1,43 @@
+{% extends 'partials/base.html' %}
+
+{% block title %} Home {% endblock %}
+{% block content %}
+
+    <div class="container ">
+        <h1>Wellcome!</h1>
+        <div class="row justify-content-center">
+            <div class="col">
+                <p class="col-form-label">Enter Username</p>
+            </div>
+            <div class="col">
+                <input class="form-control" id="user-name-input" type="text"><br>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col justify-content-center">
+                <p class="col-form-label">Enter Room Name</p>
+            </div>
+            <div class="col">
+                <input class="form-control" id="room-name-input" type="text"><br>
+            </div>
+        </div>
+
+        <input class="btn btn-primary" id="submit" type="button" value="START">
+    </div>
+    <script>
+        document.querySelector('#user-name-input').focus();
+
+        document.querySelector('#room-name-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#submit').click();
+            }
+        };
+
+        document.querySelector('#submit').onclick = function(e) {
+            var userName = document.querySelector('#user-name-input').value;
+            var roomName = document.querySelector('#room-name-input').value;
+            window.location.pathname = '/' + roomName + '/' + userName + '/';
+        };
+    </script>
+{% endblock %}

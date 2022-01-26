@@ -1,0 +1,62 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block title %} Room {% endblock %}
+{% block content %}
+    <p>Room Name: {{ room_name }} | User Name: {{ user_name }}</p>
+    <textarea class="form-control" id="chat-log" cols="100" rows="20"></textarea><br>
+    <div class="row">
+        <div class="col">
+            <input class="form-control" id="chat-message-input" type="text" size="200">
+        </div>
+        <div class="col-auto">
+            <input class="btn btn-warning" id="chat-message-submit" type="button" value="Send">
+        </div>
+
+        <div class="col-auto">
+            <button id="disconnect" type="button" class="btn btn-secondary">Leave Room "{{ room_name }}"</button>
+        </div>
+    </div>
+
+
+    {{ room_name|json_script:"room-name" }}
+    {{ user_name|json_script:"user-name" }}
+
+    <script src="{% static 'reconnecting-websocket.js' %}"></script>
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const userName = JSON.parse(document.getElementById('user-name').textContent);
+
+        const chatSocket = new ReconnectingWebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const msg = `${data.message.usr}: ${data.message.content}`
+
+            document.querySelector('#chat-log').value += (msg + '\n');
+        };
+
+        chatSocket.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function (e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function () {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({'message': message, 'command': 'new_msg', 'from': userName}));
+            messageInputDom.value = '';
+        };
+
+        document.querySelector('#disconnect').onclick = function (e) {
+            window.location.pathname = '/' ;
+        };
+
+    </script>
+
+{% endblock %}
